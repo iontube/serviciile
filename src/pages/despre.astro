@@ -1,0 +1,37 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SEOHead from '../components/SEOHead.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+---
+
+<Layout>
+  <SEOHead
+    slot="head"
+    title="Despre serviciile.ro"
+    description="Despre echipa serviciile.ro - cine suntem și de ce am creat acest site."
+    canonical="/despre/"
+  />
+
+  <div class="wrap-sm py-8">
+    <Breadcrumb items={[{ label: 'Despre' }]} />
+
+    <h1 class="text-2xl font-heading font-bold text-slate-900 mb-6">Despre serviciile.ro</h1>
+
+    <div class="content">
+      <h2>Cine suntem</h2>
+      <p>serviciile.ro este un proiect editorial independent care ajută românii să aleagă servicii de calitate în orașul lor. Nu listăm firme, nu facem publicitate și nu primim comisioane. Oferim doar informații obiective.</p>
+
+      <h2>Misiunea noastră</h2>
+      <p>Când ai nevoie de un instalator, un electrician sau o firmă de curățenie, prima problemă e cum alegi pe cineva de încredere. serviciile.ro te ajută cu sfaturi practice: ce întrebi, ce verifici, ce prețuri să te aștepți și cum eviți problemele.</p>
+
+      <h2>Ce acoperim</h2>
+      <p>Acoperim 60 de tipuri de servicii în 35 de orașe din România, organizate pe 14 categorii: de la construcții și renovări la sănătate, frumusețe, educație și servicii profesionale. Fiecare serviciu are ghiduri specifice per oraș.</p>
+
+      <h2>Informații importante</h2>
+      <p>Prețurile și informațiile de pe site sunt orientative. Nu garantăm disponibilitatea sau calitatea vreunui furnizor de servicii. Recomandăm întotdeauna să ceri oferte în scris și să verifici referințele înainte de a angaja pe cineva.</p>
+
+      <h2>Contact</h2>
+      <p>Pentru întrebări sau sugestii: <strong>contact@serviciile.ro</strong>.</p>
+    </div>
+  </div>
+</Layout>
