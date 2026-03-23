@@ -1,0 +1,175 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SEOHead from '../../components/SEOHead.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { servicii, categorii, orase, getAllPagini, getServiciuBySlug, getOrasBySlug, getPaginiForServiciuOras, getTopOrase } from '../../helpers/data';
+import type { Pagina } from '../../helpers/types';
+import { buildWebPageSchema, buildBreadcrumbSchema, buildServiceSchema, buildFAQSchema } from '../../helpers/structured-data';
+
+export function getStaticPaths() {
+  const all = getAllPagini();
+  return all.map(p => ({
+    params: { serviciu: p.serviciuSlug, pagina: p.slug },
+    props: { pagina: p },
+  }));
+}
+
+const { pagina } = Astro.props as { pagina: Pagina };
+const serviciu = getServiciuBySlug(pagina.serviciuSlug)!;
+const oras = getOrasBySlug(pagina.orasSlug);
+const categorie = categorii.find(c => c.servicii.includes(serviciu.slug));
+
+// Interlinking
+const faqsInOras = getPaginiForServiciuOras(pagina.serviciuSlug, pagina.orasSlug)
+  .filter(p => p.slug !== pagina.slug);
+const serviciiSimilare = servicii.filter(s => s.categorie === serviciu.categorie && s.slug !== serviciu.slug).slice(0, 4);
+const oraseVecine = getTopOrase().filter(o => o.slug !== pagina.orasSlug).slice(0, 6);
+
+const isOrasPage = pagina.tip === 'oras';
+---
+
+<Layout>
+  <SEOHead
+    slot="head"
+    title={pagina.metaTitle}
+    description={pagina.metaDescription}
+    canonical={`/${pagina.serviciuSlug}/${pagina.slug}/`}
+    jsonLd={[
+      buildWebPageSchema(pagina.titlu, pagina.metaDescription, `/${pagina.serviciuSlug}/${pagina.slug}/`),
+      buildBreadcrumbSchema([
+        { label: 'Acasă', href: '/' },
+        { label: serviciu.nume, href: `/${serviciu.slug}/` },
+        ...(oras ? [{ label: oras.nume }] : []),
+      ]),
+      ...(isOrasPage && oras ? [buildServiceSchema(serviciu.nume, oras.nume, serviciu.descriere, `/${pagina.serviciuSlug}/${pagina.slug}/`)] : []),
+      ...(!isOrasPage ? [buildFAQSchema([{ question: pagina.titlu, answer: pagina.intro }])] : []),
+    ].filter(Boolean)}
+  />
+
+  <article class="wrap-sm py-8">
+    <Breadcrumb items={[
+      ...(categorie ? [{ label: categorie.nume, href: `/categorie/${categorie.slug}/` }] : []),
+      { label: serviciu.nume, href: `/${serviciu.slug}/` },
+      ...(isOrasPage ? [{ label: oras?.nume || '' }] : [
+        { label: oras?.nume || '', href: `/${serviciu.slug}/${pagina.orasSlug}/` },
+        { label: pagina.titlu },
+      ]),
+    ]} />
+
+    <header class="mb-8">
+      <div class="flex gap-2 mb-3">
+        <a href={`/${serviciu.slug}/`} class="tag no-underline hover:bg-forest-100">{serviciu.nume}</a>
+        {oras && <span class="inline-flex items-center px-3 py-1 rounded-sm text-xs font-medium bg-cream-100 text-slate-600 border-b-2 border-cream-200">{oras.nume}</span>}
+      </div>
+      <h1 class="text-xl sm:text-2xl font-heading font-bold text-slate-900 leading-snug">{pagina.titlu}</h1>
+    </header>
+
+    {isOrasPage && (
+      <Fragment>
+        <div class="content mb-8">
+          <p>{serviciu.nume} în {oras?.nume} acoperă {serviciu.descriere.toLowerCase()} Piața locală de servicii variază ca prețuri și disponibilitate față de alte orașe din {oras?.regiune || 'regiune'}.</p>
+          <p>Mai jos găsești răspunsuri la cele mai frecvente întrebări despre {serviciu.singular} în {oras?.nume}: cum alegi, ce prețuri să te aștepți, ce verifici și cum eviți problemele.</p>
+        </div>
+
+        <section class="mb-10">
+          <h2 class="text-lg font-heading font-bold text-slate-900 mb-4">Întrebări frecvente</h2>
+          <div class="space-y-2">
+            {faqsInOras.map(p => (
+              <a href={`/${p.serviciuSlug}/${p.slug}/`} class="group flex items-center justify-between border border-slate-200 rounded-sm px-4 py-3 no-underline hover:border-forest-300 transition-colors">
+                <span class="text-sm font-medium text-slate-800 group-hover:text-forest-700 transition-colors">{p.titlu}</span>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-forest-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section class="mb-10 pt-8 border-t border-slate-100">
+          <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-3">Servicii similare în {oras?.nume}</h2>
+          <div class="flex flex-wrap gap-2">
+            {serviciiSimilare.map(s => (
+              <a href={`/${s.slug}/${pagina.orasSlug}/`} class="tag no-underline hover:bg-forest-100">{s.nume}</a>
+            ))}
+          </div>
+        </section>
+
+        <section class="pt-8 border-t border-slate-100">
+          <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-3">{serviciu.nume} în alte orașe</h2>
+          <div class="flex flex-wrap gap-2">
+            {oraseVecine.map(o => (
+              <a href={`/${serviciu.slug}/${o.slug}/`} class="tag no-underline hover:bg-forest-100">{o.nume}</a>
+            ))}
+          </div>
+        </section>
+      </Fragment>
+    )}
+
+    {!isOrasPage && (
+      <Fragment>
+        <div class="content mb-8">
+          <p>{pagina.intro}</p>
+        </div>
+
+        {pagina.sectiuni.map(s => (
+          <section class="mb-8">
+            <h2 class="text-lg font-heading font-bold text-slate-900 mb-3">{s.titlu}</h2>
+            {s.tip === 'lista' ? (
+              <ul class="space-y-2">
+                {s.items.map(item => (
+                  <li class="flex gap-3">
+                    <span class="shrink-0 w-1.5 h-1.5 rounded-full bg-forest-400 mt-2"></span>
+                    <div class="text-slate-700 text-sm">
+                      {item.titlu && <strong class="text-slate-900 block mb-0.5">{item.titlu}</strong>}
+                      <span>{item.text}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div class="content">{s.items.map(item => <p>{item.text}</p>)}</div>
+            )}
+          </section>
+        ))}
+
+        <div class="tipbox mb-10">
+          <p>{pagina.concluzie}</p>
+        </div>
+
+        {faqsInOras.length > 0 && (
+          <section class="mb-10 pt-8 border-t border-slate-100">
+            <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-4">{serviciu.nume} în {oras?.nume}</h2>
+            <div class="space-y-1.5">
+              {faqsInOras.slice(0, 5).map(p => (
+                <a href={`/${p.serviciuSlug}/${p.slug}/`} class="group flex items-center justify-between py-2 px-3 -mx-3 rounded-sm no-underline hover:bg-slate-50">
+                  <span class="text-sm text-slate-700 group-hover:text-forest-600">{p.titlu}</span>
+                  <svg class="w-3.5 h-3.5 text-slate-300 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section class="mb-10">
+          <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-3">{serviciu.nume} în alte orașe</h2>
+          <div class="flex flex-wrap gap-2">
+            {oraseVecine.slice(0, 5).map(o => (
+              <a href={`/${serviciu.slug}/${o.slug}/`} class="tag no-underline hover:bg-forest-100">{o.nume}</a>
+            ))}
+          </div>
+        </section>
+
+        <section class="pt-8 border-t border-slate-100">
+          <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-3">Servicii similare în {oras?.nume}</h2>
+          <div class="flex flex-wrap gap-2">
+            {serviciiSimilare.map(s => (
+              <a href={`/${s.slug}/${pagina.orasSlug}/`} class="tag no-underline hover:bg-forest-100">{s.nume}</a>
+            ))}
+          </div>
+        </section>
+      </Fragment>
+    )}
+  </article>
+</Layout>

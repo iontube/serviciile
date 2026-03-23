@@ -1,0 +1,232 @@
+/**
+ * Generates all data for serviciile.ro
+ * Combinatorial: servicii × orașe × FAQ
+ */
+import { writeFileSync, mkdirSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const dataDir = resolve(__dirname, '../src/data');
+mkdirSync(dataDir, { recursive: true });
+
+function slugify(text) {
+  return text.toLowerCase()
+    .replace(/[ăâ]/g, 'a').replace(/[î]/g, 'i').replace(/[ș]/g, 's').replace(/[ț]/g, 't')
+    .replace(/[é]/g, 'e').replace(/\?/g, '').replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').substring(0, 80);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SERVICII (60 tipuri)
+// ═══════════════════════════════════════════════════════════════
+
+const SERVICII = [
+  { slug: 'instalatori', nume: 'Instalatori', singular: 'un instalator', categorie: 'Construcții și renovări', descriere: 'Instalații sanitare, termice și de gaz.' },
+  { slug: 'electricieni', nume: 'Electricieni', singular: 'un electrician', categorie: 'Construcții și renovări', descriere: 'Instalații electrice, tablouri, prize, iluminat.' },
+  { slug: 'zugravi', nume: 'Zugravi', singular: 'un zugrav', categorie: 'Construcții și renovări', descriere: 'Zugraveli interioare și exterioare, vopsitorie.' },
+  { slug: 'faiantari', nume: 'Faianțari', singular: 'un faianțar', categorie: 'Construcții și renovări', descriere: 'Montaj gresie, faianță, mozaic.' },
+  { slug: 'parchetari', nume: 'Parchetari', singular: 'un parchetar', categorie: 'Construcții și renovări', descriere: 'Montaj parchet, laminat, pardoseli.' },
+  { slug: 'tamplari', nume: 'Tâmplari', singular: 'un tâmplar', categorie: 'Construcții și renovări', descriere: 'Mobilier la comandă, uși, ferestre din lemn.' },
+  { slug: 'zidari', nume: 'Zidari', singular: 'un zidar', categorie: 'Construcții și renovări', descriere: 'Zidărie, tencuieli, reparații structurale.' },
+  { slug: 'rigipsari', nume: 'Rigipsari', singular: 'un rigipsar', categorie: 'Construcții și renovări', descriere: 'Pereți și tavane din rigips, izolații.' },
+  { slug: 'dulgheri', nume: 'Dulgheri', singular: 'un dulgher', categorie: 'Construcții și renovări', descriere: 'Structuri din lemn, șarpante, acoperișuri.' },
+  { slug: 'tinichigii-acoperisuri', nume: 'Tinichigii acoperișuri', singular: 'un tinichigiu', categorie: 'Construcții și renovări', descriere: 'Învelitori, jgheaburi, burlane, reparații acoperiș.' },
+  { slug: 'firme-constructii', nume: 'Firme de construcții', singular: 'o firmă de construcții', categorie: 'Construcții și renovări', descriere: 'Construcții la cheie, renovări complete.' },
+  { slug: 'arhitecti', nume: 'Arhitecți', singular: 'un arhitect', categorie: 'Construcții și renovări', descriere: 'Proiectare, autorizații, design interior.' },
+  { slug: 'designeri-interior', nume: 'Designeri de interior', singular: 'un designer de interior', categorie: 'Construcții și renovări', descriere: 'Amenajări interioare, concept și execuție.' },
+  { slug: 'firme-curatenie', nume: 'Firme de curățenie', singular: 'o firmă de curățenie', categorie: 'Servicii casnice', descriere: 'Curățenie profesională pentru locuințe și birouri.' },
+  { slug: 'firme-ddd', nume: 'Firme DDD', singular: 'o firmă de dezinsecție', categorie: 'Servicii casnice', descriere: 'Dezinsecție, dezinfecție, deratizare.' },
+  { slug: 'firme-mutari', nume: 'Firme de mutări', singular: 'o firmă de mutări', categorie: 'Servicii casnice', descriere: 'Transport mobilier, ambalare, montaj-demontaj.' },
+  { slug: 'curatenie-covoare', nume: 'Curățare covoare', singular: 'un serviciu de curățare covoare', categorie: 'Servicii casnice', descriere: 'Spălare profesională covoare și mochete.' },
+  { slug: 'curatenie-canapele', nume: 'Curățare canapele', singular: 'un serviciu de curățare canapele', categorie: 'Servicii casnice', descriere: 'Curățare tapițerie, detașare pete.' },
+  { slug: 'menajere', nume: 'Menajere', singular: 'o menajeră', categorie: 'Servicii casnice', descriere: 'Curățenie regulată la domiciliu.' },
+  { slug: 'bone', nume: 'Bone', singular: 'o bonă', categorie: 'Servicii casnice', descriere: 'Îngrijire copii la domiciliu.' },
+  { slug: 'lacatusi', nume: 'Lăcătuși', singular: 'un lăcătuș', categorie: 'Servicii tehnice', descriere: 'Deschideri uși, schimb yală, chei.' },
+  { slug: 'reparatii-electrocasnice', nume: 'Service electrocasnice', singular: 'un service de electrocasnice', categorie: 'Servicii tehnice', descriere: 'Service mașini de spălat, frigidere, cuptoare.' },
+  { slug: 'reparatii-calculatoare', nume: 'Service calculatoare', singular: 'un service de calculatoare', categorie: 'Servicii tehnice', descriere: 'Service PC, laptop, rețele.' },
+  { slug: 'reparatii-telefoane', nume: 'Service telefoane', singular: 'un service de telefoane', categorie: 'Servicii tehnice', descriere: 'Înlocuire ecran, baterie, software.' },
+  { slug: 'service-auto', nume: 'Service auto', singular: 'un service auto', categorie: 'Servicii auto', descriere: 'Reparații mecanice, ITP, diagnosticare.' },
+  { slug: 'vulcanizari', nume: 'Vulcanizări', singular: 'o vulcanizare', categorie: 'Servicii auto', descriere: 'Schimb anvelope, echilibrare, reparații pneuri.' },
+  { slug: 'spalatorii-auto', nume: 'Spălătorii auto', singular: 'o spălătorie auto', categorie: 'Servicii auto', descriere: 'Spălare, polish, detailing auto.' },
+  { slug: 'tractari-auto', nume: 'Tractări auto', singular: 'un serviciu de tractare', categorie: 'Servicii auto', descriere: 'Tractare, transport vehicule, asistență rutieră.' },
+  { slug: 'scoli-soferi', nume: 'Școli de șoferi', singular: 'o școală de șoferi', categorie: 'Educație', descriere: 'Cursuri permis auto, categorii B, C, D.' },
+  { slug: 'meditatii-matematica', nume: 'Profesori meditații matematică', singular: 'un profesor de meditații matematică', categorie: 'Educație', descriere: 'Pregătire particulară matematică.' },
+  { slug: 'meditatii-engleza', nume: 'Profesori engleză', singular: 'un profesor de engleză', categorie: 'Educație', descriere: 'Cursuri particulare limba engleză.' },
+  { slug: 'scoli-limbi-straine', nume: 'Școli de limbi străine', singular: 'o școală de limbi străine', categorie: 'Educație', descriere: 'Cursuri de engleză, franceză, germană, spaniolă.' },
+  { slug: 'gradinite-private', nume: 'Grădinițe private', singular: 'o grădiniță privată', categorie: 'Educație', descriere: 'Grădinițe și after school privat.' },
+  { slug: 'cabinete-stomatologice', nume: 'Cabinete stomatologice', singular: 'un cabinet stomatologic', categorie: 'Sănătate', descriere: 'Tratamente dentare, implant, ortodonție.' },
+  { slug: 'cabinete-oftalmologice', nume: 'Cabinete oftalmologice', singular: 'un cabinet oftalmologic', categorie: 'Sănătate', descriere: 'Consultații, ochelari, chirurgie oculară.' },
+  { slug: 'fizioterapie', nume: 'Fizioterapie', singular: 'un cabinet de fizioterapie', categorie: 'Sănătate', descriere: 'Kinetoterapie, recuperare, masaj terapeutic.' },
+  { slug: 'cabinete-psihologie', nume: 'Cabinete psihologie', singular: 'un psiholog', categorie: 'Sănătate', descriere: 'Psihoterapie, consiliere, evaluare psihologică.' },
+  { slug: 'clinici-veterinare', nume: 'Clinici veterinare', singular: 'o clinică veterinară', categorie: 'Sănătate', descriere: 'Consultații, vaccinări, chirurgie veterinară.' },
+  { slug: 'saloane-cosmetica', nume: 'Saloane cosmetică', singular: 'un salon de cosmetică', categorie: 'Frumusețe', descriere: 'Tratamente faciale, manichiură, pedichiură.' },
+  { slug: 'saloane-coafura', nume: 'Saloane coafură', singular: 'un salon de coafură', categorie: 'Frumusețe', descriere: 'Tuns, vopsit, coafuri, tratamente capilare.' },
+  { slug: 'saloane-masaj', nume: 'Saloane masaj', singular: 'un salon de masaj', categorie: 'Frumusețe', descriere: 'Masaj relaxare, terapeutic, anticelulitic.' },
+  { slug: 'sali-fitness', nume: 'Săli fitness', singular: 'o sală de fitness', categorie: 'Sport', descriere: 'Antrenamente, cardio, greutăți, clase de grup.' },
+  { slug: 'antrenori-personali', nume: 'Antrenori personali', singular: 'un antrenor personal', categorie: 'Sport', descriere: 'Personal training, programe personalizate.' },
+  { slug: 'piscine', nume: 'Piscine', singular: 'o piscină', categorie: 'Sport', descriere: 'Înot, aqua gym, cursuri de înot.' },
+  { slug: 'fotografi', nume: 'Fotografi', singular: 'un fotograf', categorie: 'Evenimente', descriere: 'Fotografie de nuntă, botez, corporate.' },
+  { slug: 'videografi', nume: 'Videografi', singular: 'un videograf', categorie: 'Evenimente', descriere: 'Filmare evenimente, editare video.' },
+  { slug: 'organizatori-evenimente', nume: 'Organizatori evenimente', singular: 'un organizator de evenimente', categorie: 'Evenimente', descriere: 'Organizare nunți, botezuri, petreceri corporate.' },
+  { slug: 'firme-catering', nume: 'Firme catering', singular: 'o firmă de catering', categorie: 'Evenimente', descriere: 'Catering pentru evenimente, meniuri personalizate.' },
+  { slug: 'contabili', nume: 'Contabili', singular: 'un contabil', categorie: 'Servicii profesionale', descriere: 'Contabilitate, declarații fiscale, consultanță.' },
+  { slug: 'avocati', nume: 'Avocați', singular: 'un avocat', categorie: 'Servicii profesionale', descriere: 'Asistență juridică, reprezentare în instanță.' },
+  { slug: 'notari', nume: 'Notari', singular: 'un notar', categorie: 'Servicii profesionale', descriere: 'Acte notariale, autentificări, legalizări.' },
+  { slug: 'traducatori', nume: 'Traducători', singular: 'un traducător', categorie: 'Servicii profesionale', descriere: 'Traduceri autorizate, interpretariat.' },
+  { slug: 'evaluatori-imobiliari', nume: 'Evaluatori imobiliari', singular: 'un evaluator imobiliar', categorie: 'Servicii profesionale', descriere: 'Evaluare proprietăți, rapoarte de evaluare.' },
+  { slug: 'agentii-imobiliare', nume: 'Agenții imobiliare', singular: 'o agenție imobiliară', categorie: 'Imobiliare', descriere: 'Vânzare, cumpărare, închiriere proprietăți.' },
+  { slug: 'firme-paza', nume: 'Firme de pază', singular: 'o firmă de pază', categorie: 'Securitate', descriere: 'Pază și protecție, sisteme de alarmă.' },
+  { slug: 'sisteme-supraveghere', nume: 'Sisteme supraveghere', singular: 'un sistem de supraveghere', categorie: 'Securitate', descriere: 'Camere video, montaj, monitorizare.' },
+  { slug: 'curierat', nume: 'Servicii curierat', singular: 'un serviciu de curierat', categorie: 'Transport', descriere: 'Livrări colete, transport documente.' },
+  { slug: 'firme-transport', nume: 'Firme transport', singular: 'o firmă de transport', categorie: 'Transport', descriere: 'Transport marfă, containere, internațional.' },
+  { slug: 'gradinarit', nume: 'Grădinari', singular: 'un grădinar', categorie: 'Exterior', descriere: 'Amenajare grădini, gazon, tăiere copaci.' },
+  { slug: 'amenajari-exterioare', nume: 'Amenajări exterioare', singular: 'o firmă de amenajări exterioare', categorie: 'Exterior', descriere: 'Pavaje, garduri, terase, fântâni.' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// ORAȘE (41 - same as meseriiro)
+// ═══════════════════════════════════════════════════════════════
+
+const ORASE = [
+  { slug: 'bucuresti', nume: 'București', regiune: 'Muntenia', populatie: 1883425 },
+  { slug: 'cluj-napoca', nume: 'Cluj-Napoca', regiune: 'Transilvania', populatie: 324576 },
+  { slug: 'timisoara', nume: 'Timișoara', regiune: 'Banat', populatie: 319279 },
+  { slug: 'iasi', nume: 'Iași', regiune: 'Moldova', populatie: 382484 },
+  { slug: 'constanta', nume: 'Constanța', regiune: 'Dobrogea', populatie: 283872 },
+  { slug: 'craiova', nume: 'Craiova', regiune: 'Oltenia', populatie: 269506 },
+  { slug: 'brasov', nume: 'Brașov', regiune: 'Transilvania', populatie: 253200 },
+  { slug: 'galati', nume: 'Galați', regiune: 'Moldova', populatie: 249432 },
+  { slug: 'ploiesti', nume: 'Ploiești', regiune: 'Muntenia', populatie: 209945 },
+  { slug: 'oradea', nume: 'Oradea', regiune: 'Crișana', populatie: 196367 },
+  { slug: 'braila', nume: 'Brăila', regiune: 'Muntenia', populatie: 180302 },
+  { slug: 'arad', nume: 'Arad', regiune: 'Crișana', populatie: 159074 },
+  { slug: 'pitesti', nume: 'Pitești', regiune: 'Muntenia', populatie: 155383 },
+  { slug: 'sibiu', nume: 'Sibiu', regiune: 'Transilvania', populatie: 147245 },
+  { slug: 'bacau', nume: 'Bacău', regiune: 'Moldova', populatie: 144307 },
+  { slug: 'targu-mures', nume: 'Târgu Mureș', regiune: 'Transilvania', populatie: 134290 },
+  { slug: 'baia-mare', nume: 'Baia Mare', regiune: 'Maramureș', populatie: 123738 },
+  { slug: 'buzau', nume: 'Buzău', regiune: 'Muntenia', populatie: 115494 },
+  { slug: 'botosani', nume: 'Botoșani', regiune: 'Moldova', populatie: 106847 },
+  { slug: 'satu-mare', nume: 'Satu Mare', regiune: 'Sătmar', populatie: 102411 },
+  { slug: 'ramnicu-valcea', nume: 'Râmnicu Vâlcea', regiune: 'Oltenia', populatie: 98776 },
+  { slug: 'drobeta-turnu-severin', nume: 'Drobeta-Turnu Severin', regiune: 'Oltenia', populatie: 92617 },
+  { slug: 'suceava', nume: 'Suceava', regiune: 'Bucovina', populatie: 92121 },
+  { slug: 'piatra-neamt', nume: 'Piatra Neamț', regiune: 'Moldova', populatie: 85055 },
+  { slug: 'targu-jiu', nume: 'Târgu Jiu', regiune: 'Oltenia', populatie: 82504 },
+  { slug: 'tulcea', nume: 'Tulcea', regiune: 'Dobrogea', populatie: 73707 },
+  { slug: 'slatina', nume: 'Slatina', regiune: 'Oltenia', populatie: 70293 },
+  { slug: 'alba-iulia', nume: 'Alba Iulia', regiune: 'Transilvania', populatie: 63536 },
+  { slug: 'calarasi', nume: 'Călărași', regiune: 'Muntenia', populatie: 65181 },
+  { slug: 'giurgiu', nume: 'Giurgiu', regiune: 'Muntenia', populatie: 61353 },
+  { slug: 'deva', nume: 'Deva', regiune: 'Transilvania', populatie: 61123 },
+  { slug: 'zalau', nume: 'Zalău', regiune: 'Sălaj', populatie: 56202 },
+  { slug: 'sfantu-gheorghe', nume: 'Sfântu Gheorghe', regiune: 'Transilvania', populatie: 56006 },
+  { slug: 'resita', nume: 'Reșița', regiune: 'Banat', populatie: 73282 },
+  { slug: 'bistrita', nume: 'Bistrița', regiune: 'Transilvania', populatie: 75076 },
+  { slug: 'vaslui', nume: 'Vaslui', regiune: 'Moldova', populatie: 55407 },
+  { slug: 'slobozia', nume: 'Slobozia', regiune: 'Muntenia', populatie: 45891 },
+  { slug: 'focsani', nume: 'Focșani', regiune: 'Moldova', populatie: 73868 },
+  { slug: 'targoviste', nume: 'Târgoviște', regiune: 'Muntenia', populatie: 73964 },
+  { slug: 'miercurea-ciuc', nume: 'Miercurea Ciuc', regiune: 'Transilvania', populatie: 38966 },
+  { slug: 'alexandria', nume: 'Alexandria', regiune: 'Muntenia', populatie: 45434 },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// FAQ templates per serviciu
+// ═══════════════════════════════════════════════════════════════
+
+const FAQ_TEMPLATES = [
+  'Cum alegi {singular} în {oras}',
+  'Cât costă {singular} în {oras}',
+  'Ce verifici la {singular} în {oras}',
+  'Ce garanții ar trebui să ofere {singular} în {oras}',
+  'Cum eviți țepele când angajezi {singular} în {oras}',
+  'Ce întrebi {singular} înainte să îl angajezi în {oras}',
+  'Când ai nevoie de {singular} în {oras}',
+  'Ce experiență trebuie să aibă {singular} în {oras}',
+];
+
+const TOP_ORASE_COUNT = 35;
+
+// ═══════════════════════════════════════════════════════════════
+// GENERATE
+// ═══════════════════════════════════════════════════════════════
+
+console.log('Generating serviciile.ro data...\n');
+
+// Categorii
+const categorii = [...new Set(SERVICII.map(s => s.categorie))];
+const categoriiData = categorii.map(c => ({
+  slug: slugify(c),
+  nume: c,
+  servicii: SERVICII.filter(s => s.categorie === c).map(s => s.slug),
+}));
+writeFileSync(resolve(dataDir, 'categorii.json'), JSON.stringify(categoriiData, null, 2));
+
+// Servicii
+writeFileSync(resolve(dataDir, 'servicii.json'), JSON.stringify(SERVICII, null, 2));
+console.log(`servicii.json: ${SERVICII.length} servicii`);
+
+// Orașe
+writeFileSync(resolve(dataDir, 'orase.json'), JSON.stringify(ORASE, null, 2));
+console.log(`orase.json: ${ORASE.length} orașe`);
+
+// Pagini: serviciu × oraș × FAQ
+let totalPagini = 0;
+const allPagini = [];
+
+for (const serviciu of SERVICII) {
+  const pagini = [];
+
+  const topOrase = ORASE.sort((a, b) => b.populatie - a.populatie).slice(0, TOP_ORASE_COUNT);
+  for (const oras of topOrase) {
+    // Main page: /instalatori/bucuresti/
+    pagini.push({
+      slug: oras.slug,
+      titlu: `${serviciu.nume} în ${oras.nume}`,
+      serviciuSlug: serviciu.slug,
+      orasSlug: oras.slug,
+      orasNume: oras.nume,
+      tip: 'oras',
+      intro: 'Placeholder.',
+      sectiuni: [{ titlu: 'Despre', tip: 'text', items: [{ text: 'Placeholder.' }] }],
+      concluzie: 'Placeholder.',
+      metaTitle: `${serviciu.nume} în ${oras.nume} - Cum alegi, prețuri, sfaturi`,
+      metaDescription: `${serviciu.nume} în ${oras.nume}: cum alegi, ce prețuri să te aștepți, ce verifici. Informații practice.`,
+    });
+
+    // FAQ pages per oraș
+    for (const tpl of FAQ_TEMPLATES) {
+      const titlu = tpl.replace('{singular}', serviciu.singular).replace('{oras}', oras.nume);
+      const slug = slugify(titlu);
+      pagini.push({
+        slug,
+        titlu: titlu + '?',
+        serviciuSlug: serviciu.slug,
+        orasSlug: oras.slug,
+        orasNume: oras.nume,
+        tip: 'faq',
+        intro: 'Placeholder.',
+        sectiuni: [{ titlu: 'Răspuns', tip: 'text', items: [{ text: 'Placeholder.' }] }],
+        concluzie: 'Placeholder.',
+        metaTitle: `${titlu} - ${serviciu.nume}`,
+        metaDescription: `${titlu}. Sfaturi practice și informații utile.`,
+      });
+    }
+  }
+
+  writeFileSync(resolve(dataDir, `pagini-${serviciu.slug}.json`), JSON.stringify(pagini, null, 2));
+  console.log(`${serviciu.slug}: ${pagini.length} pagini`);
+  totalPagini += pagini.length;
+}
+
+console.log(`\nTotal: ${totalPagini} pagini`);
+console.log(`Categorii: ${categoriiData.length}`);
+
+// Check limit
+if (totalPagini > 19500) {
+  console.log('\n⚠️ ATENȚIE: Depășește limita Cloudflare Pages! Trebuie redus.');
+} else {
+  console.log('\n✓ Sub limita de 20k Cloudflare Pages.');
+}

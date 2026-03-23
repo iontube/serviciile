@@ -1,0 +1,146 @@
+[
+  {
+    "slug": "constructii-si-renovari",
+    "nume": "Construcții și renovări",
+    "servicii": [
+      "instalatori",
+      "electricieni",
+      "zugravi",
+      "faiantari",
+      "parchetari",
+      "tamplari",
+      "zidari",
+      "rigipsari",
+      "dulgheri",
+      "tinichigii-acoperisuri",
+      "firme-constructii",
+      "arhitecti",
+      "designeri-interior"
+    ]
+  },
+  {
+    "slug": "servicii-casnice",
+    "nume": "Servicii casnice",
+    "servicii": [
+      "firme-curatenie",
+      "firme-ddd",
+      "firme-mutari",
+      "curatenie-covoare",
+      "curatenie-canapele",
+      "menajere",
+      "bone"
+    ]
+  },
+  {
+    "slug": "servicii-tehnice",
+    "nume": "Servicii tehnice",
+    "servicii": [
+      "lacatusi",
+      "reparatii-electrocasnice",
+      "reparatii-calculatoare",
+      "reparatii-telefoane"
+    ]
+  },
+  {
+    "slug": "servicii-auto",
+    "nume": "Servicii auto",
+    "servicii": [
+      "service-auto",
+      "vulcanizari",
+      "spalatorii-auto",
+      "tractari-auto"
+    ]
+  },
+  {
+    "slug": "educatie",
+    "nume": "Educație",
+    "servicii": [
+      "scoli-soferi",
+      "meditatii-matematica",
+      "meditatii-engleza",
+      "scoli-limbi-straine",
+      "gradinite-private"
+    ]
+  },
+  {
+    "slug": "sanatate",
+    "nume": "Sănătate",
+    "servicii": [
+      "cabinete-stomatologice",
+      "cabinete-oftalmologice",
+      "fizioterapie",
+      "cabinete-psihologie",
+      "clinici-veterinare"
+    ]
+  },
+  {
+    "slug": "frumusete",
+    "nume": "Frumusețe",
+    "servicii": [
+      "saloane-cosmetica",
+      "saloane-coafura",
+      "saloane-masaj"
+    ]
+  },
+  {
+    "slug": "sport",
+    "nume": "Sport",
+    "servicii": [
+      "sali-fitness",
+      "antrenori-personali",
+      "piscine"
+    ]
+  },
+  {
+    "slug": "evenimente",
+    "nume": "Evenimente",
+    "servicii": [
+      "fotografi",
+      "videografi",
+      "organizatori-evenimente",
+      "firme-catering"
+    ]
+  },
+  {
+    "slug": "servicii-profesionale",
+    "nume": "Servicii profesionale",
+    "servicii": [
+      "contabili",
+      "avocati",
+      "notari",
+      "traducatori",
+      "evaluatori-imobiliari"
+    ]
+  },
+  {
+    "slug": "imobiliare",
+    "nume": "Imobiliare",
+    "servicii": [
+      "agentii-imobiliare"
+    ]
+  },
+  {
+    "slug": "securitate",
+    "nume": "Securitate",
+    "servicii": [
+      "firme-paza",
+      "sisteme-supraveghere"
+    ]
+  },
+  {
+    "slug": "transport",
+    "nume": "Transport",
+    "servicii": [
+      "curierat",
+      "firme-transport"
+    ]
+  },
+  {
+    "slug": "exterior",
+    "nume": "Exterior",
+    "servicii": [
+      "gradinarit",
+      "amenajari-exterioare"
+    ]
+  }
+]

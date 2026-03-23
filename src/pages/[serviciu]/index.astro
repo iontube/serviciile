@@ -1,0 +1,106 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SEOHead from '../../components/SEOHead.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { servicii, categorii, getTopOrase, getPaginiForServiciu, getPaginiForServiciuOras } from '../../helpers/data';
+import { buildWebPageSchema, buildBreadcrumbSchema, buildItemListSchema } from '../../helpers/structured-data';
+
+export function getStaticPaths() {
+  return servicii.map(s => ({ params: { serviciu: s.slug }, props: { serviciu: s } }));
+}
+
+const { serviciu } = Astro.props;
+const categorie = categorii.find(c => c.servicii.includes(serviciu.slug));
+const orase = getTopOrase();
+const totalPagini = getPaginiForServiciu(serviciu.slug).length;
+const serviciiSimilare = servicii.filter(s => s.categorie === serviciu.categorie && s.slug !== serviciu.slug);
+---
+
+<Layout>
+  <SEOHead
+    slot="head"
+    title={`${serviciu.nume} în România - Cum alegi, prețuri și sfaturi`}
+    description={`Tot ce trebuie să știi despre ${serviciu.nume.toLowerCase()} în România: cum alegi ${serviciu.singular}, ce prețuri să te aștepți, ce verifici. Informații pentru ${orase.length} orașe.`}
+    canonical={`/${serviciu.slug}/`}
+    jsonLd={[
+      buildWebPageSchema(`${serviciu.nume} în România`, serviciu.descriere, `/${serviciu.slug}/`),
+      buildBreadcrumbSchema([
+        { label: 'Acasă', href: '/' },
+        ...(categorie ? [{ label: categorie.nume, href: `/categorie/${categorie.slug}/` }] : []),
+        { label: serviciu.nume },
+      ]),
+      buildItemListSchema(orase.map(o => ({ name: `${serviciu.nume} în ${o.nume}`, url: `/${serviciu.slug}/${o.slug}/` }))),
+    ]}
+  />
+
+  <div class="wrap-sm py-8">
+    <Breadcrumb items={[
+      ...(categorie ? [{ label: categorie.nume, href: `/categorie/${categorie.slug}/` }] : []),
+      { label: serviciu.nume },
+    ]} />
+
+    <header class="mb-8">
+      {categorie && <a href={`/categorie/${categorie.slug}/`} class="tag no-underline hover:bg-forest-100 mb-4 inline-block">{categorie.nume}</a>}
+      <h1 class="text-2xl sm:text-3xl font-heading font-bold text-slate-900 mb-3">{serviciu.nume} în România</h1>
+      <p class="text-slate-500">{totalPagini} articole pentru {orase.length} orașe</p>
+    </header>
+
+    <!-- Pillar content -->
+    <div class="content mb-10">
+      <h2>Ce face {serviciu.singular}</h2>
+      <p>{serviciu.descriere} Un profesionist calificat aduce experiența, uneltele potrivite și garanția lucrării. Diferența dintre a angaja pe cineva competent și a alege greșit se vede în calitatea rezultatului și în costurile pe termen lung.</p>
+
+      <h2>Cum alegi {serviciu.singular}</h2>
+      <p>Înainte să angajezi {serviciu.singular}, verifică experiența anterioară (cere poze cu lucrări finalizate), cere ofertă detaliată în scris cu materiale și manoperă separate, verifică dacă are autorizațiile necesare și întreabă de garanție. Un profesionist serios nu se supără pe întrebări - dimpotrivă, le anticipează.</p>
+
+      <h2>Prețuri orientative</h2>
+      <p>Prețurile pentru {serviciu.nume.toLowerCase()} variază semnificativ între orașe. În București și Cluj prețurile sunt cu 20-30% mai mari decât media națională, în timp ce în orașele mai mici poți găsi tarife cu 10-15% sub medie. Sezonul contează: vara și primăvara prețurile cresc din cauza cererii mari.</p>
+
+      <h2>Ce verifici după finalizare</h2>
+      <p>După ce lucrarea e gata, verifică fiecare detaliu înainte să faci plata finală. Cere garanție scrisă cu durată și condiții clare. Fotografiază rezultatul - e util dacă apar probleme ulterior. Un profesionist bun vine la remediere fără costuri suplimentare în perioada de garanție.</p>
+    </div>
+
+    <!-- Table of contents - orașe -->
+    <section class="mb-12">
+      <h2 class="text-lg font-heading font-bold text-slate-900 mb-4">Alege orașul</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        {orase.map(o => {
+          const faqCount = getPaginiForServiciuOras(serviciu.slug, o.slug).filter(p => p.tip === 'faq').length;
+          return (
+            <a href={`/${serviciu.slug}/${o.slug}/`} class="group flex items-center justify-between border border-slate-200 rounded-sm px-4 py-3 no-underline hover:border-forest-300 transition-colors">
+              <div>
+                <span class="font-medium text-slate-800 group-hover:text-forest-700 text-sm">{o.nume}</span>
+                <span class="text-xs text-slate-400 block">{o.regiune} · {faqCount} articole</span>
+              </div>
+              <svg class="w-4 h-4 text-slate-300 group-hover:text-forest-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- Servicii similare (cross-silo linking) -->
+    {serviciiSimilare.length > 0 && (
+      <section class="mb-10 pt-8 border-t border-slate-100">
+        <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-4">Servicii similare</h2>
+        <div class="grid sm:grid-cols-2 gap-2">
+          {serviciiSimilare.map(s => (
+            <a href={`/${s.slug}/`} class="group flex items-center gap-3 border border-slate-200 rounded-sm px-4 py-3 no-underline hover:border-forest-300 transition-colors">
+              <div class="w-1.5 h-8 bg-forest-200 group-hover:bg-forest-400 rounded-full shrink-0 transition-colors"></div>
+              <div>
+                <span class="font-medium text-slate-800 group-hover:text-forest-700 text-sm">{s.nume}</span>
+                <span class="text-xs text-slate-400 block">{s.descriere}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {categorie && (
+      <a href={`/categorie/${categorie.slug}/`} class="link text-sm">← Toate serviciile din {categorie.nume.toLowerCase()}</a>
+    )}
+  </div>
+</Layout>

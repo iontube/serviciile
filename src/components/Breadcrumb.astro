@@ -1,0 +1,21 @@
+---
+import type { BreadcrumbItem } from '../helpers/types';
+interface Props { items: BreadcrumbItem[]; }
+const { items } = Astro.props;
+const all = [{ label: 'Acasă', href: '/' }, ...items];
+---
+
+<nav aria-label="Breadcrumb" class="py-4">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm text-slate-400">
+    {all.map((item, i) => (
+      <li class="flex items-center gap-1.5">
+        {i > 0 && <span class="text-slate-300">›</span>}
+        {item.href && i < all.length - 1 ? (
+          <a href={item.href} class="hover:text-forest-600 no-underline">{item.label}</a>
+        ) : (
+          <span class="text-slate-600 font-medium">{item.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>

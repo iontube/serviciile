@@ -1,0 +1,90 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SEOHead from '../../components/SEOHead.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { categorii, servicii, getTopOrase } from '../../helpers/data';
+import { buildWebPageSchema, buildBreadcrumbSchema } from '../../helpers/structured-data';
+
+export function getStaticPaths() {
+  return categorii.map(c => ({ params: { categorie: c.slug }, props: { categorie: c } }));
+}
+
+const { categorie } = Astro.props;
+const catServicii = servicii.filter(s => s.categorie === categorie.nume);
+const orase = getTopOrase().slice(0, 10);
+const alteCategorii = categorii.filter(c => c.slug !== categorie.slug);
+---
+
+<Layout>
+  <SEOHead
+    slot="head"
+    title={`${categorie.nume} - Servicii în România`}
+    description={`Servicii de ${categorie.nume.toLowerCase()} în România: ${catServicii.map(s => s.nume.toLowerCase()).slice(0, 5).join(', ')}. Cum alegi, prețuri, sfaturi.`}
+    canonical={`/categorie/${categorie.slug}/`}
+    jsonLd={[
+      buildWebPageSchema(categorie.nume, `Servicii de ${categorie.nume.toLowerCase()} în România`, `/categorie/${categorie.slug}/`),
+      buildBreadcrumbSchema([{ label: 'Acasă', href: '/' }, { label: categorie.nume }]),
+    ]}
+  />
+
+  <div class="wrap-sm py-8">
+    <Breadcrumb items={[{ label: categorie.nume }]} />
+
+    <header class="mb-10">
+      <h1 class="text-2xl sm:text-3xl font-heading font-bold text-slate-900 mb-4">{categorie.nume}</h1>
+    </header>
+
+    <!-- Pillar content -->
+    <div class="content mb-10">
+      <p>Serviciile de {categorie.nume.toLowerCase()} acoperă o gamă largă de specialități, fiecare cu cerințe proprii de calificare, unelte și experiență. Alegerea corectă a unui profesionist face diferența între o lucrare care durează ani și una care trebuie refăcută în câteva luni.</p>
+      <p>Pe această pagină găsești toate tipurile de servicii din categoria {categorie.nume.toLowerCase()}, organizate pe specialități. Fiecare serviciu are pagini dedicate pe orașe cu informații despre cum alegi un profesionist, ce prețuri medii să te aștepți și ce întrebări să pui înainte să angajezi pe cineva.</p>
+      <p>Nu listăm firme și nu facem recomandări. Oferim informații obiective pe care le poți folosi ca să iei decizii informate, indiferent de orașul în care te afli.</p>
+    </div>
+
+    <!-- Servicii din categorie -->
+    <section class="mb-12">
+      <h2 class="text-lg font-heading font-bold text-slate-900 mb-4">Servicii din {categorie.nume.toLowerCase()}</h2>
+      <div class="space-y-3">
+        {catServicii.map(s => (
+          <a href={`/${s.slug}/`} class="group flex items-center gap-4 border border-slate-200 rounded-sm px-5 py-4 no-underline hover:border-forest-300 transition-colors">
+            <div class="w-2 h-12 bg-forest-200 group-hover:bg-forest-400 rounded-full shrink-0 transition-colors"></div>
+            <div class="flex-1">
+              <h3 class="font-heading font-semibold text-slate-900 group-hover:text-forest-700 transition-colors">{s.nume}</h3>
+              <p class="text-sm text-slate-500 mt-0.5">{s.descriere}</p>
+            </div>
+            <svg class="w-4 h-4 text-slate-300 group-hover:text-forest-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Top orașe -->
+    <section class="mb-12">
+      <h2 class="text-lg font-heading font-bold text-slate-900 mb-4">Cele mai căutate orașe</h2>
+      <div class="grid sm:grid-cols-2 gap-2">
+        {orase.map(o => (
+          <div class="border border-slate-200 rounded-sm px-4 py-3">
+            <p class="font-medium text-slate-800 text-sm mb-1">{o.nume}</p>
+            <div class="flex flex-wrap gap-1">
+              {catServicii.slice(0, 3).map(s => (
+                <a href={`/${s.slug}/${o.slug}/`} class="text-xs text-forest-600 hover:text-forest-800 no-underline underline decoration-forest-200 underline-offset-2">{s.nume}</a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Alte categorii -->
+    <section class="pt-8 border-t border-slate-100">
+      <h2 class="text-sm font-heading font-semibold text-slate-400 uppercase tracking-wider mb-3">Alte categorii de servicii</h2>
+      <div class="flex flex-wrap gap-2">
+        {alteCategorii.map(c => (
+          <a href={`/categorie/${c.slug}/`} class="tag no-underline hover:bg-forest-100">{c.nume}</a>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

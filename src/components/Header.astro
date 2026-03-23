@@ -1,0 +1,38 @@
+---
+import { categorii } from '../helpers/data';
+const path = Astro.url.pathname;
+---
+
+<header class="bg-white border-b border-slate-200">
+  <div class="wrap">
+    <div class="flex items-center justify-between h-14">
+      <a href="/" class="no-underline shrink-0">
+        <img src="/logo.svg" alt="serviciile.ro" class="h-10 w-auto" width="250" height="50" loading="eager" />
+      </a>
+      <nav class="hidden lg:flex items-center gap-1">
+        {categorii.slice(0, 6).map(c => (
+          <a href={`/#${c.slug}`} class:list={['px-3 py-1.5 rounded-sm text-sm font-medium no-underline text-slate-500 hover:text-slate-900 hover:bg-slate-50']}>
+            {c.nume}
+          </a>
+        ))}
+      </nav>
+      <button id="menu-btn" class="lg:hidden p-2 text-slate-400 hover:text-slate-700" aria-label="Meniu">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-100">
+    <nav class="wrap py-3 flex flex-col gap-0.5">
+      {categorii.map(c => (
+        <a href={`/#${c.slug}`} class="px-3 py-2 rounded-sm text-sm text-slate-500 hover:text-slate-900 hover:bg-slate-50 no-underline">{c.nume}</a>
+      ))}
+    </nav>
+  </div>
+</header>
+<script>
+  const btn = document.getElementById('menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  if (btn && menu) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+</script>

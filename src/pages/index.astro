@@ -1,0 +1,154 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SEOHead from '../components/SEOHead.astro';
+import { servicii, categorii, getTopOrase, getAllPagini } from '../helpers/data';
+import { buildWebSiteSchema, buildWebPageSchema, buildItemListSchema } from '../helpers/structured-data';
+
+const topOrase = getTopOrase();
+const totalPagini = getAllPagini().length;
+const topServicii = servicii.slice(0, 8);
+---
+
+<Layout>
+  <SEOHead
+    slot="head"
+    title="serviciile.ro - Cum alegi servicii în România"
+    description="Informații practice despre servicii în România: cum alegi, ce prețuri să te aștepți, ce verifici. Instalatori, electricieni, zugravi și multe altele."
+    canonical="/"
+    jsonLd={[
+      buildWebSiteSchema(),
+      buildWebPageSchema('serviciile.ro', 'Informații practice despre servicii în România', '/'),
+      buildItemListSchema(categorii.map(c => ({ name: c.nume, url: `/categorie/${c.slug}/` }))),
+    ]}
+  />
+
+  <!-- Hero -->
+  <section class="bg-forest-900 py-20 sm:py-28 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-0 right-0 w-96 h-96 bg-forest-400 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-1/4 w-64 h-64 bg-cream-200 rounded-full blur-3xl"></div>
+    </div>
+    <div class="wrap relative z-10">
+      <div class="max-w-2xl">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-white leading-tight mb-5">
+          Cum alegi <span class="text-forest-300">servicii de calitate</span> în orașul tău
+        </h1>
+        <p class="text-forest-200 text-lg leading-relaxed mb-8">
+          {servicii.length} tipuri de servicii, {topOrase.length} orașe, {totalPagini.toLocaleString('ro-RO')} articole cu sfaturi practice. Fără reclame la firme, doar informații utile.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/instalatori/" class="btn-main no-underline">Instalatori</a>
+          <a href="/electricieni/" class="btn-outline text-white/80 border-white/20 hover:bg-white/10 no-underline">Electricieni</a>
+          <a href="/firme-curatenie/" class="btn-outline text-white/80 border-white/20 hover:bg-white/10 no-underline">Curățenie</a>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex gap-8 mt-10 pt-8 border-t border-white/10">
+          <div>
+            <p class="text-2xl font-heading font-bold text-white">{servicii.length}</p>
+            <p class="text-xs text-forest-300">tipuri de servicii</p>
+          </div>
+          <div>
+            <p class="text-2xl font-heading font-bold text-white">{topOrase.length}</p>
+            <p class="text-xs text-forest-300">orașe acoperite</p>
+          </div>
+          <div>
+            <p class="text-2xl font-heading font-bold text-white">{categorii.length}</p>
+            <p class="text-xs text-forest-300">categorii</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Intro text -->
+  <section class="wrap py-12">
+    <div class="max-w-3xl">
+      <div class="content">
+        <p>Când ai nevoie de un instalator, un electrician sau o firmă de curățenie, prima întrebare e: cum alegi pe cineva de încredere? Prețul mic nu înseamnă neapărat economie, iar cel mai scump nu garantează calitate.</p>
+        <p>Pe serviciile.ro găsești informații practice pentru fiecare tip de serviciu din România: ce să verifici, ce întrebări să pui, ce prețuri medii să te aștepți și cum eviți problemele. Nu listăm firme, nu facem reclame. Doar ghiduri obiective pe care le poți folosi indiferent de oraș.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cele mai căutate servicii -->
+  <section class="bg-white py-12 border-y border-slate-100">
+    <div class="wrap">
+      <h2 class="text-xl font-heading font-bold text-slate-900 mb-6">Cele mai căutate servicii</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {topServicii.map(s => (
+          <a href={`/${s.slug}/`} class="group border border-slate-200 rounded-sm p-4 no-underline hover:border-forest-300 hover:shadow-sm transition-all">
+            <div class="w-2 h-2 bg-forest-400 rounded-full mb-3"></div>
+            <h3 class="font-heading font-semibold text-slate-900 group-hover:text-forest-700 transition-colors text-sm mb-1">{s.nume}</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">{s.descriere}</p>
+            <div class="flex flex-wrap gap-1 mt-3">
+              {topOrase.slice(0, 3).map(o => (
+                <span class="text-[10px] text-forest-600 bg-forest-50 px-1.5 py-0.5 rounded-sm">{o.nume}</span>
+              ))}
+              <span class="text-[10px] text-slate-400">+{topOrase.length - 3}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Toate categoriile -->
+  {categorii.map(cat => {
+    const catServicii = servicii.filter(s => s.categorie === cat.nume);
+    return (
+      <section id={cat.slug} class="wrap py-10 border-b border-slate-100">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-heading font-bold text-slate-900">{cat.nume}</h2>
+          <a href={`/categorie/${cat.slug}/`} class="text-sm text-forest-600 hover:text-forest-800 no-underline">Vezi tot →</a>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {catServicii.map(s => (
+            <a href={`/${s.slug}/`} class="group flex items-center gap-3 border border-slate-200 rounded-sm px-4 py-3 no-underline hover:border-forest-300 transition-colors">
+              <div class="w-1.5 h-7 bg-forest-200 group-hover:bg-forest-400 rounded-full transition-colors shrink-0"></div>
+              <div>
+                <span class="font-medium text-slate-800 group-hover:text-forest-700 text-sm transition-colors">{s.nume}</span>
+                <p class="text-xs text-slate-400 mt-0.5">{s.descriere}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    );
+  })}
+
+  <!-- Orașe populare cu linkuri rapide -->
+  <section class="wrap py-12">
+    <h2 class="text-lg font-heading font-bold text-slate-900 mb-6">Servicii pe orașe</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {topOrase.slice(0, 9).map(o => (
+        <div class="border border-slate-200 rounded-sm p-4">
+          <h3 class="font-heading font-semibold text-slate-900 text-sm mb-3">{o.nume}</h3>
+          <div class="space-y-1">
+            {servicii.slice(0, 4).map(s => (
+              <a href={`/${s.slug}/${o.slug}/`} class="block text-xs text-forest-600 hover:text-forest-800 no-underline py-0.5">{s.nume} în {o.nume} →</a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="flex flex-wrap gap-2 mt-6">
+      {topOrase.slice(9).map(o => (
+        <span class="tag">{o.nume}</span>
+      ))}
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bg-forest-50 py-12">
+    <div class="wrap text-center">
+      <h2 class="text-xl font-heading font-bold text-slate-900 mb-3">Nu ști de unde să începi?</h2>
+      <p class="text-slate-600 mb-6 max-w-lg mx-auto">Alege categoria de servicii care te interesează sau caută direct tipul de serviciu din meniul de mai sus.</p>
+      <div class="flex flex-wrap justify-center gap-2">
+        {categorii.map(c => (
+          <a href={`/categorie/${c.slug}/`} class="tag no-underline hover:bg-forest-100">{c.nume}</a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

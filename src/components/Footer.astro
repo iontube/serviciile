@@ -1,0 +1,20 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-slate-200 mt-20 bg-white">
+  <div class="wrap py-10">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <a href="/" class="font-heading font-bold text-slate-900 no-underline">serviciile<span class="text-forest-600">.ro</span></a>
+        <p class="text-slate-400 text-sm mt-1">Informații practice despre servicii în România.</p>
+      </div>
+      <nav class="flex gap-4 text-sm text-slate-400">
+        <a href="/contact/" class="hover:text-slate-700 no-underline">Contact</a>
+        <a href="/confidentialitate/" class="hover:text-slate-700 no-underline">Confidențialitate</a>
+        <a href="/termeni/" class="hover:text-slate-700 no-underline">Termeni</a>
+      </nav>
+    </div>
+    <p class="text-slate-300 text-xs mt-6">&copy; {year} serviciile.ro. Informații orientative.</p>
+  </div>
+</footer>
